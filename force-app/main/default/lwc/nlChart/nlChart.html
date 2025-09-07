@@ -1,0 +1,91 @@
+<template>
+  <div class="slds-grid slds-gutters">
+    <!-- LEFT: Input -->
+    <div class="slds-col slds-size_1-of-3">
+      <lightning-textarea
+        label="Ask Salesforce (natural language)"
+        value={prompt}
+        onchange={onPrompt}
+      ></lightning-textarea>
+
+      <div class="slds-m-top_small slds-grid slds-grid_vertical-align-center">
+        <lightning-button
+          variant="brand"
+          label="Run"
+          onclick={start}
+          disabled={running}
+        ></lightning-button>
+        <template if:true={running}>
+          <lightning-spinner size="small" class="slds-m-left_small"></lightning-spinner>
+        </template>
+      </div>
+
+      <template if:true={error}>
+        <div class="slds-text-color_error slds-m-top_small">{error}</div>
+      </template>
+
+      <template if:true={hasCsvLinks}>
+        <div class="slds-m-top_medium">
+          <h3 class="slds-text-title_caps slds-m-bottom_x-small">Datasets (CSV)</h3>
+          <template for:each={csvLinks} for:item="link">
+            <div key={link.id}>
+              <a href={link.url} target="_blank" rel="noopener noreferrer">{link.label}</a>
+            </div>
+          </template>
+        </div>
+      </template>
+    </div>
+
+    <!-- RIGHT: Status + Output -->
+    <div class="slds-col slds-size_2-of-3">
+      <!-- Step-by-step status -->
+      <article class="slds-card">
+        <div class="slds-card__header slds-grid">
+          <header class="slds-media slds-media_center slds-has-flexi-truncate">
+            <div class="slds-media__figure">
+              <lightning-icon icon-name="utility:trail" size="small" alternative-text="Run status"></lightning-icon>
+            </div>
+            <div class="slds-media__body">
+              <h2 class="slds-card__header-title">Run Status</h2>
+            </div>
+          </header>
+        </div>
+        <div class="slds-card__body slds-card__body_inner">
+          <ul class="slds-timeline">
+            <template for:each={steps} for:item="s">
+              <li key={s.id} class="slds-timeline__item">
+                <div class="slds-media">
+                  <div class="slds-media__figure slds-timeline__icon">
+                    <lightning-icon icon-name={s.icon} size="x-small" alternative-text={s.state}></lightning-icon>
+                  </div>
+                  <div class="slds-media__body">
+                    <div class="slds-grid slds-grid_align-spread slds-grid_vertical-align-center">
+                      <span class={s.textClass}>{s.label}</span>
+                      <template if:true={s.badge}>
+                        <span class={s.badge.class}>{s.badge.text}</span>
+                      </template>
+                    </div>
+                    <template if:true={s.note}>
+                      <p class="slds-text-color_weak slds-m-top_xxx-small">{s.note}</p>
+                    </template>
+                  </div>
+                </div>
+              </li>
+            </template>
+          </ul>
+
+          <template if:true={running}>
+            <div class="slds-m-top_small slds-text-color_weak">{statusMsg}</div>
+          </template>
+        </div>
+      </article>
+
+      <!-- Chart output -->
+      <div class="slds-m-top_medium">
+        <template if:true={chartUrl}>
+          <img src={chartUrl} alt="Generated chart" style="max-width:100%; border:1px solid #ddd; border-radius:8px;">
+        </template>
+      </div>
+    </div>
+  </div>
+</template>
